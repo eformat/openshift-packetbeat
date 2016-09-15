@@ -11,5 +11,5 @@ RUN wget https://download.elastic.co/beats/packetbeat/${FILENAME} && tar zxvf ${
 WORKDIR packetbeat-${VERSION}-${ARCH}
 #ADD packetbeat.yml packetbeat.yml
 
-RUN ifconfig
+RUN setcap cap_net_raw=ep /tmp/packetbeat-${VERSION}-${ARCH}/packetbeat
 CMD ["./packetbeat", "-e", "-c=packetbeat.yml"]
