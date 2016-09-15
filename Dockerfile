@@ -12,4 +12,4 @@ WORKDIR packetbeat-${VERSION}-${ARCH}
 #ADD packetbeat.yml packetbeat.yml
 
 RUN setcap cap_net_raw=ep /opt/packetbeat-${VERSION}-${ARCH}/packetbeat
-CMD ["./packetbeat", "-e", "-c=/opt/packetbeat-${VERSION}-${ARCH}/config/packetbeat.yml"]
+CMD ["./packetbeat", "-e", "-c=config/packetbeat.yml"]
