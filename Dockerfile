@@ -10,5 +10,5 @@ RUN wget https://download.elastic.co/beats/packetbeat/${FILENAME} && tar zxvf ${
 
 WORKDIR packetbeat-${VERSION}-${ARCH}
 #ADD packetbeat.yml packetbeat.yml
-
+USER ROOT
 CMD ["./packetbeat", "-e", "-c=packetbeat.yml"]
