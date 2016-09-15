@@ -36,19 +36,54 @@ docker build -t my_packetbeat .
 docker run --privileged --net host --name packetbeat -d my_packetbeat
 
 
-kibana:
-image: kibana:latest
-container_name: kibana
-ports:
-- "5601:5601"
-environment:
-- ELASTICSEARCH_URL=http://elasticsearch:9200
-links:
-- elasticsearch
+## Run Kibana and Elasticsearch
 
-elasticsearch:
-container_name: elasticsearch
-image: elasticsearch:latest
-ports:
-- "9200:9200"
-- "9300:9300"
+It should be possible to run using the Aggregated Logging privded with Openshift (which has RBAC). for
+now, run packetbeat against in memory instances of ES, Kibana 
+
+# Elasticsearch
+
+    cat <<EOF | oc create -f -
+    ---
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: <elasticsearch></elasticsearch>
+    EOF
+    oc adm policy add-scc-to-user anyuid -z elasticsearch -n packetbeat
+
+    oc import-image elasticsearch:latest --confirm
+    oc create -f ./es-template.yaml
+    oc new-app --template=es-template
+
+    -- test
+    ose-master1:~$ curl 172.30.138.29:9200
+    {
+      "name" : "Quasimodo",
+      "cluster_name" : "elasticsearch",
+      "version" : {
+        "number" : "2.4.0",
+        "build_hash" : "ce9f0c7394dee074091dd1bc4e9469251181fc55",
+        "build_timestamp" : "2016-08-29T09:14:17Z",
+        "build_snapshot" : false,
+        "lucene_version" : "5.5.2"
+      },
+      "tagline" : "You Know, for Search"
+    }
+
+# Kibana
+
+    cat <<EOF | oc create -f -
+    ---
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: kibana
+    EOF
+    oc adm policy add-scc-to-user anyuid -z kibana -n packetbeat
+
+    oc import-image kibana:latest --confirm
+    oc create -f ./kibana-template.yaml
+    oc new-app --template=kibana-template
+    oc expose svc kibana --hostname=kibana-packetbeat.apps.eformat.nz
+
