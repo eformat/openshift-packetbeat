@@ -1,0 +1,97 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: openshift-packetbeat
+    name: openshift-packetbeat
+  spec: {}
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: openshift-packetbeat
+    name: openshift-packetbeat
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: openshift-packetbeat:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        uri: https://github.com/noelo/openshift-packetbeat.git
+      secrets: []
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: DockerImage
+          name: centos:7
+      type: Docker
+    triggers:
+    - github:
+        secret: VCJX1El31kuAQeEKzZfa
+      type: GitHub
+    - generic:
+        secret: Ib46h7RXkEOXzjkZAP5Y
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: openshift-packetbeat
+    name: openshift-packetbeat
+  spec:
+    replicas: 1
+    selector:
+      app: openshift-packetbeat
+      deploymentconfig: openshift-packetbeat
+    strategy:
+      resources: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/container.openshift-packetbeat.image.entrypoint: '["/bin/bash"]'
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: openshift-packetbeat
+          deploymentconfig: openshift-packetbeat
+      spec:
+        containers:
+        - image: openshift-packetbeat:latest
+          name: openshift-packetbeat
+          resources: {}
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - openshift-packetbeat
+        from:
+          kind: ImageStreamTag
+          name: openshift-packetbeat:latest
+      type: ImageChange
+  status: {}
+kind: List
+metadata: {}
