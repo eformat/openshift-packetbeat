@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Template
+labels:
+  component: es
+  logging-infra: elasticsearch
+  provider: openshift
+metadata:
+  annotations:
+    description: Template for deploying ElasticSearch with proxy/plugin for storing
+      and retrieving aggregated cluster logs.
+    tags: infrastructure
+  creationTimestamp: null
+  labels:
+    logging-infra: elasticsearch
+  name: es-template
+objects:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: ${ES_DEPLOYMENT_NAME}
+  spec:
+    replicas: 1
+    selector:
+      component: es
+      deployment: ${ES_DEPLOYMENT_NAME}
+      provider: openshift
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          component: es
+          deployment: ${ES_DEPLOYMENT_NAME}
+          provider: openshift
+      spec:
+        serviceAccountName: elasticsearch
+        containers:
+        - env:
+          image: elasticsearch
+          imagePullPolicy: Always
+          name: elasticsearch
+          ports:
+          - containerPort: 9200
+            name: elasticsearch
+          - containerPort: 9300
+            name: cluster
+          volumeMounts:
+          - mountPath: /usr/share/elasticsearch/data
+            name: elasticsearch-storage
+          securityContext:
+            capabilities: {}
+            privileged: false
+        limits:
+        - max:
+            memory: ${INSTANCE_RAM}i
+          min:
+            memory: 512Mi
+          type: Pod
+        volumes:
+        - emptyDir: {}
+          name: elasticsearch-storage
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - elasticsearch
+        from:
+          kind: ImageStreamTag
+          name: elasticsearch:${IMAGE_VERSION}
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: elasticsearch
+  spec:
+    ports:
+    - name: 9200-tcp
+      port: 9200
+      protocol: TCP
+      targetPort: 9200
+    selector:
+      deploymentconfig: ${ES_DEPLOYMENT_NAME}
+parameters:
+- description: Use to create multiple deployments in order to "scale"; will share services but must have different names.
+  from: es-[a-z0-9]{8}
+  generate: expression
+  name: ES_DEPLOYMENT_NAME
+- description: Amount of RAM to reserve per ElasticSearch instance (e.g. 1024M or 8G)
+  name: INSTANCE_RAM
+  value: 1024M
+- description: Number of nodes required to elect a master (ES minimum_master_nodes). By default, derived from ES_CLUSTER_SIZE / 2 + 1.
+  name: NODE_QUORUM
+  value: "1"
+- description: Specify version for elasticsearch
+  name: IMAGE_VERSION
+  value: latest
