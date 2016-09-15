@@ -1,0 +1,123 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      name: myapp
+    name: nodejs-ex
+  spec: {}
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      name: myapp
+    name: nodejs-ex
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: nodejs-ex:latest
+    postCommit: {}
+    resources: {}
+    source:
+      git:
+        uri: https://github.com/openshift/nodejs-ex
+      secrets: []
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: nodejs:4
+          namespace: openshift
+      type: Source
+    triggers:
+    - github:
+        secret: Cp07ajG30yyQZ9S62bri
+      type: GitHub
+    - generic:
+        secret: P-xIQ3XLwdYU43pU0vCo
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      name: myapp
+    name: nodejs-ex
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: nodejs-ex
+      name: myapp
+    strategy:
+      resources: {}
+    template:
+      metadata:
+        annotations:
+          openshift.io/container.nodejs-ex.image.entrypoint: '["container-entrypoint","/bin/sh","-c","$STI_SCRIPTS_PATH/usage"]'
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          deploymentconfig: nodejs-ex
+          name: myapp
+      spec:
+        containers:
+        - image: nodejs-ex:latest
+          name: nodejs-ex
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+        - image: openshift-packetbeat:latest
+          name: packetbeat
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - nodejs-ex
+        from:
+          kind: ImageStreamTag
+          name: nodejs-ex:latest
+      type: ImageChange
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      name: myapp
+    name: nodejs-ex
+  spec:
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: nodejs-ex
+      name: myapp
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}
