@@ -1,7 +1,7 @@
 
 
-docker build -t my_packetbeat .
-docker run --privileged --net host --name packetbeat -d my_packetbeat
+    docker build -t my_packetbeat .
+    docker run --privileged --net host --name packetbeat -d my_packetbeat
 
 
 kibana:
