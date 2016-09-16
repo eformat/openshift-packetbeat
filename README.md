@@ -1,12 +1,12 @@
 
 ### Create the packetbeat image
-
+```
 oc new-app https://github.com/noelo/openshift-packetbeat.git --strategy=docker -o yaml > packetbeat.yaml
-
+```
 ### Create the sample app and add the packetbeat image as a sidecar
-
+```
 oc new-app https://github.com/openshift/nodejs-ex -l name=myapp -o yaml > sample-node-app.yaml
-
+```
 Edit and add the sidecar image
 
 ```
@@ -28,8 +28,13 @@ spec:
 ```
 
 
-#### TODO : Add a config map to configure packetbeat
+### Add a config map to configure packetbeat
+```
+oc create configmap packetbeat-config --from-file=packetbeat.yml
 
+oc volume dc/nodejs-ex --add --overwrite -t configmap --configmap-name=packetbeat-config --name=packetbeat-config-volume-1 -m=/opt/packetbeat-1.3.0-x86_64/config
+
+```
 
 ## Docker commands for non-OSE environments
 docker build -t my_packetbeat .
