@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>HelloWorld</title>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
+    </head>
+    <script>
+      function run () {
+        var viz = new Vizceral.default(document.getElementById('vizceral'));
+        viz.updateData({
+          name: 'us-west-2',
+          renderer: 'global',
+          maxVolume: 500,
+          nodes: [
+            {name: 'INTERNET'},
+            {name: 'service'}
+          ],
+          connections: [
+            {
+              source: 'INTERNET',
+              target: 'service',
+              metrics: { normal: 100, warning: 95, danger: 5 },
+              metadata: { streaming: true }
+            }
+          ]
+        });
+        viz.setView();
+        viz.animate();
+      }
+    </script>
+    <body onload='run()'>
+        <main class="container">
+        <header class="jumbotron alert alert-info">
+             <h1>Hello Vizceral</h1>
+        </header>
+        
+        <canvas id='vizceral'></canvas>
+
+        <script src="dist/vizceral.js"></script>
+        <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    </body>
+</html>
