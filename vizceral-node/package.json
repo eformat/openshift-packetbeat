@@ -27,7 +27,8 @@
     "vizceral": "latest",
     "express": "latest",
     "compression": "latest",
-    "body-parser": "latest"            
+    "body-parser": "latest",
+    "elasticsearch": "latest"          
   },
   "devDependencies": {
   }
